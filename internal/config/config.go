@@ -9,7 +9,7 @@ import (
 )
 
 type HttpServer struct {
-	Addrs string
+	Addrs string `yaml:"address"`
 }
 
 type Config struct {
@@ -40,7 +40,11 @@ func Init() *Config {
 
 	var config Config
 
-	cleanenv.ReadConfig(configPath, config)
+	err := cleanenv.ReadConfig(configPath, &config)
+
+	if err != nil {
+		log.Fatalf("can not read config file : %s", err.Error())
+	}
 
 	return &config
 }
