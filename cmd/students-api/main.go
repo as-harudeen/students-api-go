@@ -12,18 +12,29 @@ import (
 	"time"
 
 	"github.com/as-harudeen/students-api/internal/config"
+	"github.com/as-harudeen/students-api/internal/http/handlers/student"
+	"github.com/as-harudeen/students-api/internal/storage/sqlite"
 )
 
 func main() {
 	// load config
 	cfg := config.Init()
 	// database setup
+
+	storage, err := sqlite.New(cfg)
+	if err != nil {
+		slog.Error("error")
+		log.Fatal(err)
+	}
+
+	slog.Info("storage initialized")
+
 	// setup router
 	router := http.NewServeMux()
 
-	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to students api"))
-	})
+	router.HandleFunc("POST /api/students", student.New(storage))
+	router.HandleFunc("GET /api/students/{id}", student.GetById(storage))
+	router.HandleFunc("GET /api/students", student.GetList(storage))
 
 	// setup server
 	server := http.Server{
